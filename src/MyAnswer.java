@@ -3,6 +3,7 @@ This is my answer to the A5-WebService-assigmenet
 Andreas Øie
  */
 
+import org.json.JSONArray;
 import org.json.JSONObject;
 
 import java.io.*;
@@ -27,8 +28,13 @@ public class MyAnswer {
         int tempSessionID = assignment.authorizeLogin();
 
         String task1 = assignment.requestTask(tempSessionID, "1");
+        assignment.sendAnswer(tempSessionID, task1);
+
         String task2 = assignment.requestTask(tempSessionID, "2");
+        assignment.sendAnswer(tempSessionID, task2);
+
         String task3 = assignment.requestTask(tempSessionID, "3");
+        assignment.sendAnswer(tempSessionID, task3);
 
 
         // assignment.requestTask(sessID, "1");
@@ -39,7 +45,7 @@ public class MyAnswer {
     /**
      * Login and retrieve session-ID
      */
-    public int authorizeLogin() {
+    private int authorizeLogin() {
         int sessionID = 0;
         String loginPath = "dkrest/auth";
         JSONObject loginObj = new JSONObject();
@@ -56,68 +62,68 @@ public class MyAnswer {
         return sessionID;
     }
 
-    public String requestTask(int sessID, String taskNumber) {
+    private String requestTask(int sessID, String taskNumber) {
         String requestObj = null;
         String taskPath = "dkrest/gettask/"+ taskNumber + "?sessionId=" + sessID;
         requestObj = sendGET(taskPath);
         return requestObj;
     }
 
-    public void sendAnswer(int sessID, String taskObj) {
+    private void sendAnswer(int sessID, String taskObj) {
+
+        JSONObject answerOBJ = new JSONObject();
+        answerOBJ.put("sessionId", sessID);
+
         String solvingPath = "dkrest/solve";
         JSONObject task = new JSONObject(taskObj);
+
         int taskNumber = 0;
         if (task.has("taskNr")) {
             taskNumber = task.getInt("taskNr");
         }
-        String msg = "";
         switch (taskNumber) {
 
             case 1:
-                msg = "Hello";
+                answerOBJ.put("msg", "Hello");
                 break;
 
             case 2:
-                msg = "Change to the corrext context";
+                if (task.has("arguments")) {
+                    String answer = task.getJSONArray("arguments").getString(0);
+                    answerOBJ.put("msg", answer);
+                }
                 break;
 
             case 3:
                 if (task.has("arguments")) {
-                    String intValues = task.getString("arguments");
-                    msg = sumNumbs(intValues);
+                    JSONArray intArray = task.getJSONArray("arguments");
+                    String answer = multiplyNumbers(intArray);
+                    answerOBJ.put("result", answer);
                 }
                 break;
 
             case 4:
+                if (task.has("arguments")) {
+                    String hash = task.getString("arguments");
+                }
                 break;
 
             default:
                 // pass
+                break;
         }
-
-        JSONObject answerOBJ = new JSONObject();
-        answerOBJ.put("msg", msg);
+        sendPOST(solvingPath, answerOBJ);
     }
 
-        private String sumNumbs(String numbers) {
-            String[] numbs = numbers.split(",");
-            int a = Integer.parseInt(numbs[0]);
-            int b = Integer.parseInt(numbs[1]);
-            int c = Integer.parseInt(numbs[2]);
-            int sum = a*b*c;
-            return String.valueOf(sum);
+    private String multiplyNumbers(JSONArray numbers) {
+        int total = 1;
+        for (int i = 0; i < numbers.length(); i++) {
+            String numb = numbers.getString(i);
+            int numbr = Integer.parseInt(numb);
+            total = total*numbr;
         }
-
-
-
-
-
-
-
-
-
-
-
+        return String.valueOf(total);
+    }
 
 
 
@@ -197,7 +203,7 @@ public class MyAnswer {
      * @param is Inputstream to read the body from
      * @return The whole body as a string
      */
-    public String convertStreamToString(InputStream is) {
+    private String convertStreamToString(InputStream is) {
         BufferedReader in = new BufferedReader(new InputStreamReader(is));
         StringBuilder response = new StringBuilder();
         try {
