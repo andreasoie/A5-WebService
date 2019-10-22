@@ -29,7 +29,6 @@ public class GETExample {
      * Send an HTTP GET to a specific path on the web server
      */
     public void doExampleGet() {
-        // TODO: change path to something correct
         sendGet("dkrest/test/get2");
     }
 
@@ -38,7 +37,8 @@ public class GETExample {
      *
      * @param path     Relative path in the API.
      */
-    private void sendGet(String path) {
+    public String sendGet(String path) {
+        String returnObj = null;
         try {
             String url = BASE_URL + path;
             URL urlObj = new URL(url);
@@ -52,10 +52,10 @@ public class GETExample {
                 System.out.println("Server reached");
                 // Response was OK, read the body (data)
                 InputStream stream = con.getInputStream();
-                String responseBody = convertStreamToString(stream);
+                returnObj = convertStreamToString(stream);
                 stream.close();
                 System.out.println("Response from the server:");
-                System.out.println(responseBody);
+                System.out.println(returnObj);
             } else {
                 String responseDescription = con.getResponseMessage();
                 System.out.println("Request failed, response code: " + responseCode + " (" + responseDescription + ")");
@@ -66,6 +66,7 @@ public class GETExample {
             System.out.println("Something went wrong: " + e.getMessage());
             e.printStackTrace();
         }
+        return returnObj;
     }
 
     /**

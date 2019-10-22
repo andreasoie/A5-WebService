@@ -8,8 +8,10 @@ import java.net.URL;
 public class POSTExample {
 
     public static void main(String[] args) {
-        POSTExample postExample = new POSTExample("104.248.47.74", 80);
+        POSTExample postExample = new POSTExample("52.164.220.230", 80);
         postExample.post3RandomNumbers();
+
+
     }
 
     private String BASE_URL; // Base URL (address) of the server
@@ -30,16 +32,16 @@ public class POSTExample {
     public void post3RandomNumbers() {
         int a = (int) Math.round(Math.random() * 100);
         int b = (int) Math.round(Math.random() * 100);
-        int c = (int) Math.round(Math.random() * 100);
+        //int c = (int) Math.round(Math.random() * 100);
 
         JSONObject json = new JSONObject();
-        json.put("a", a);
-        json.put("b", b);
-        json.put("b", b);
+        json.put("a", 1);
+        json.put("b", 3);
+        //json.put("b", 5);
         System.out.println("Posting this JSON data to server");
         System.out.println(json.toString());
         // TODO: change path to something correct
-        sendPost("dkrest/auth", json);
+        sendPost("dkrest/test/post", json);
     }
 
     /**
@@ -48,7 +50,7 @@ public class POSTExample {
      * @param path     Relative path in the API.
      * @param jsonData The data in JSON format that will be posted to the server
      */
-    private void sendPost(String path, JSONObject jsonData) {
+    public void sendPost(String path, JSONObject jsonData) {
         try {
             String url = BASE_URL + path;
             URL urlObj = new URL(url);
@@ -90,7 +92,7 @@ public class POSTExample {
      * @param is Inputstream to read the body from
      * @return The whole body as a string
      */
-    private String convertStreamToString(InputStream is) {
+    public String convertStreamToString(InputStream is) {
         BufferedReader in = new BufferedReader(new InputStreamReader(is));
         StringBuilder response = new StringBuilder();
         try {
