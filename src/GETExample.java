@@ -9,7 +9,7 @@ import java.net.URL;
 public class GETExample {
 
     public static void main(String[] args) {
-        GETExample example = new GETExample("104.248.47.74", 80);
+        GETExample example = new GETExample("52.164.220.230", 80);
         example.doExampleGet();
     }
 
@@ -30,7 +30,7 @@ public class GETExample {
      */
     public void doExampleGet() {
         // TODO: change path to something correct
-        sendGet("dkrest/test/get");
+        sendGet("dkrest/test/get2");
     }
 
     /**
