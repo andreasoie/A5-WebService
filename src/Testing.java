@@ -1,5 +1,5 @@
 /**
- * Class reserved for testing purposes
+ * Class for testing purposes
  */
 
 public class Testing {
@@ -7,8 +7,8 @@ public class Testing {
 
 
         // TESTING THINGS OUT
-        Testing t = new Testing();
 
+        Testing t = new Testing();
 
         String tempIP = "198.92.236.0";
         String tempSUB = "255.255.252.0";
@@ -31,15 +31,16 @@ public class Testing {
     }
 
     private String getBinary(String address) {
+
         StringBuilder binary = new StringBuilder();
 
         String[] ipArray = address.split("\\.");
 
         for (int i = 0; i < ipArray.length; i++) {
+
             int temp = Integer.parseInt(ipArray[i]);
+            
             if (temp >= 0 && temp <= 255) {
-
-
                 binary.append(Integer.toBinaryString(temp));
                 binary.append('.');
             }
