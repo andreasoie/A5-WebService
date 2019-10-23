@@ -1,11 +1,24 @@
 /*
+
 This is my answer to the A5-WebService-assigmenet
-Andreas Øie
+Run the main-method and everything will solve itself :)
+
+"student": "Andreas Øie",
+"totalResult": 200,
+ "passed": true,
+"results": [
+            ["Successfully authorized", 20],
+            ["Successfully requested a task", 10],
+            ["Feedback requested", 10],
+            ["Task 1 solved!", 10],
+            ["Task 2 solved!", 10],
+            ["Task 3 solved!", 20],
+            ["Task 4 solved!", 40],
+            ["Secret task solved!", 80]
  */
 
 import org.json.JSONArray;
 import org.json.JSONObject;
-
 import java.io.*;
 import java.net.HttpURLConnection;
 import java.net.ProtocolException;
@@ -13,7 +26,6 @@ import java.net.URL;
 import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
-
 import static java.lang.Math.sqrt;
 
 public class MyAnswer {
@@ -26,10 +38,12 @@ public class MyAnswer {
 
     public static void main(String[] args) {
 
+
+
         // Create answer
         MyAnswer assignment = new MyAnswer();
 
-        // Get ID from LOGIN
+        // Get ID for further usage
         int tempSessionID = assignment.authorizeLogin();
 
         String task1 = assignment.requestTask(tempSessionID, "1");
@@ -47,6 +61,7 @@ public class MyAnswer {
         String secretTask = assignment.requestTask(tempSessionID, assignment.getSecretTask());
         assignment.sendAnswer(tempSessionID, secretTask);
 
+        // Subscribe to final result
         assignment.sendGET("dkrest/results/" + tempSessionID);
 
     }
@@ -71,6 +86,12 @@ public class MyAnswer {
         return sessionID;
     }
 
+    /**
+     * Helper-method to request spesific tasks depending on number
+     * @param sessID the session-ID of the student
+     * @param taskNumber the task number to return
+     * @return the task given by the task number
+     */
     private String requestTask(int sessID, String taskNumber) {
         String requestObj = null;
         String taskPath = "dkrest/gettask/" + taskNumber + "?sessionId=" + sessID;
@@ -78,6 +99,10 @@ public class MyAnswer {
         return requestObj;
     }
 
+    /**
+     * Helper-method to request the secret number of the hidden-task
+     * @return the secret task-number
+     */
     private String getSecretTask() {
         Double d = sqrt(4064256);
         int numbr = d.intValue();
@@ -85,12 +110,12 @@ public class MyAnswer {
         return secretNumber;
     }
 
-    private void requestSecretTask(int sessID) {
-        String requestObj = null;
-        String path = "dkrest/gettask/secrettask?sessionId=" + sessID;
-        requestObj = sendGET(path);
-    }
-
+    /**
+     * Helper-method to actually respond to the task number.
+     * Each case for its own task, separated by its number
+     * @param sessID the session-ID of the student
+     * @param taskObj the taskObject to parse assignment from
+     */
     private void sendAnswer(int sessID, String taskObj) {
 
         JSONObject answerOBJ = new JSONObject();
@@ -146,9 +171,16 @@ public class MyAnswer {
                 // pass
                 break;
         }
+
+        // We send the answer with the answerOBJ given by the belonging task
         sendPOST(solvingPath, answerOBJ);
     }
 
+    /**
+     * Helper method for multiplying different numbers parsed from a JSONArray
+     * @param numbers the JSONArray of numbers to multiply
+     * @return the combined multiplied value of the given numbers
+     */
     private String multiplyNumbers(JSONArray numbers) {
         int total = 1;
         for (int i = 0; i < numbers.length(); i++) {
@@ -159,6 +191,10 @@ public class MyAnswer {
         return String.valueOf(total);
     }
 
+    /**
+     * Helper method to retrieve the hash, pending on the given number
+     * @return the parsed hash-created by the number
+     */
     private String getHash(String numbr) {
         MessageDigest md = null;
         try {
@@ -174,6 +210,11 @@ public class MyAnswer {
         return sb.toString();
     }
 
+    /**
+     * Solving-method to compare the input hash with the reproduced hash we created
+     * @param hashGoal the hash to find
+     * @return the hash we found matching the hashGoal
+     */
     private String iterateHashSolution(String hashGoal) {
 
         String currentPin = null;
@@ -193,7 +234,12 @@ public class MyAnswer {
     }
 
 
-    // "198.92.236.0", "255.255.252.0"
+    /**
+     * Algorithm to find broadcast-address by an IP-address and a subnet mask address
+     * @param tempIP the given IP-address
+     * @param tempSUB the given subnet mask
+     * @return the correct corresponding IP-host address parsed from the input addresses
+     */
     private String findSubnetNumber(String tempIP, String tempSUB) {
 
         String[] a = tempIP.split("\\.", 4);
@@ -228,7 +274,11 @@ public class MyAnswer {
         return String.join(".", testIP);
     }
 
-
+    /**
+     * Sending HTTP GET to the givene path of the param
+     * @param path the path to redirect
+     * @return the string-info about the feedback information
+     */
     private String sendGET(String path) {
         String returnObj = null;
         try {
@@ -261,7 +311,13 @@ public class MyAnswer {
         return returnObj;
     }
 
-
+    /**
+     * Method for sending HTTP POST to URL aswelll as diplaying infomation,
+     * regarding the current info parsed from the stream and return the whole as a string.
+     * @param path the given path for redirecting HTTP POST to
+     * @param jsonData the jsonData to use for parsing and sending HTTP POST to the URL
+     * @return the string-info about the feedback information
+     */
     private String sendPOST(String path, JSONObject jsonData) {
         String returnObj = null;
         try {

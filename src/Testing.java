@@ -1,7 +1,14 @@
+/**
+ * Class reserved for testing purposes
+ */
+
 public class Testing {
     public static void main(String[] args) {
-        Testing t = new Testing();
+
+
         // TESTING THINGS OUT
+        Testing t = new Testing();
+
 
         String tempIP = "198.92.236.0";
         String tempSUB = "255.255.252.0";

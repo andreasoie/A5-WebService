@@ -10,8 +10,6 @@ public class POSTExample {
     public static void main(String[] args) {
         POSTExample postExample = new POSTExample("52.164.220.230", 80);
         postExample.post3RandomNumbers();
-
-
     }
 
     private String BASE_URL; // Base URL (address) of the server
