@@ -10,14 +10,19 @@ import java.io.*;
 import java.net.HttpURLConnection;
 import java.net.ProtocolException;
 import java.net.URL;
+import java.nio.charset.StandardCharsets;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
+
+import static java.lang.Math.sqrt;
 
 public class MyAnswer {
 
     private String email = "andreoi@stud.ntnu.no";
     private String phone = "46988288";
-    String host = "52.164.220.230";
-    int port = 80;
-    String BASE_URL = "http://" + host + ":" + port + "/";
+    private String host = "52.164.220.230";
+    private int port = 80;
+    private String BASE_URL = "http://" + host + ":" + port + "/";
 
     public static void main(String[] args) {
 
@@ -36,9 +41,15 @@ public class MyAnswer {
         String task3 = assignment.requestTask(tempSessionID, "3");
         assignment.sendAnswer(tempSessionID, task3);
 
+        String task4 = assignment.requestTask(tempSessionID, "4");
+        assignment.sendAnswer(tempSessionID, task4);
 
-        // assignment.requestTask(sessID, "1");
+        String secretTask = assignment.requestTask(tempSessionID, assignment.getSecretTask());
+        assignment.sendAnswer(tempSessionID, secretTask);
 
+        //assignment.requestSecretTask(tempSessionID);
+        // GET RESULTS
+        //assignment.sendGET("dkrest/results/" + tempSessionID);
 
     }
 
@@ -64,9 +75,22 @@ public class MyAnswer {
 
     private String requestTask(int sessID, String taskNumber) {
         String requestObj = null;
-        String taskPath = "dkrest/gettask/"+ taskNumber + "?sessionId=" + sessID;
+        String taskPath = "dkrest/gettask/" + taskNumber + "?sessionId=" + sessID;
         requestObj = sendGET(taskPath);
         return requestObj;
+    }
+
+    private String getSecretTask() {
+        Double d = sqrt(4064256);
+        int numbr = d.intValue();
+        String secretNumber = Integer.toString(numbr);
+        return secretNumber;
+    }
+
+    private void requestSecretTask(int sessID) {
+        String requestObj = null;
+        String path = "dkrest/gettask/secrettask?sessionId=" + sessID;
+        requestObj = sendGET(path);
     }
 
     private void sendAnswer(int sessID, String taskObj) {
@@ -104,7 +128,19 @@ public class MyAnswer {
 
             case 4:
                 if (task.has("arguments")) {
-                    String hash = task.getString("arguments");
+                    String pwHash = task.getJSONArray("arguments").getString(0);
+                    String answer = iterateHashSolution(pwHash);
+                    answerOBJ.put("pin", answer);
+                }
+                break;
+            case 2016:
+                if (task.has("arguments")) {
+                    String correctIP = null; // ip=yyy.yyy.yyy.yyy. (IPv4)
+                    String IPAddress = task.getJSONArray("arguments").getString(0);
+                    String subNetMask = task.getJSONArray("arguments").getString(1);
+                    correctIP = findSubnetNumber(IPAddress, subNetMask);
+                    System.out.println(correctIP);
+                    answerOBJ.put("ip", correctIP);
                 }
                 break;
 
@@ -120,11 +156,79 @@ public class MyAnswer {
         for (int i = 0; i < numbers.length(); i++) {
             String numb = numbers.getString(i);
             int numbr = Integer.parseInt(numb);
-            total = total*numbr;
+            total = total * numbr;
         }
         return String.valueOf(total);
     }
 
+    private String getHash(String numbr) {
+        MessageDigest md = null;
+        try {
+            md = MessageDigest.getInstance("MD5");
+        } catch (NoSuchAlgorithmException e) {
+            e.printStackTrace();
+        }
+        byte[] hashInBytes = md.digest(numbr.getBytes(StandardCharsets.UTF_8));
+        StringBuilder sb = new StringBuilder();
+        for (byte b : hashInBytes) {
+            sb.append(String.format("%02x", b));
+        }
+        return sb.toString();
+    }
+
+    private String iterateHashSolution(String hashGoal) {
+
+        String currentPin = null;
+
+        boolean hashFound = false;
+        while (!hashFound) {
+            for (int i = 0; i < 10000; i++) {
+                String numb = String.format("%04d", i);
+                String tempHash = getHash(numb);
+                if (tempHash.equals(hashGoal)) {
+                    hashFound = true;
+                    currentPin = numb;
+                }
+            }
+        }
+        return currentPin;
+    }
+
+
+    // "198.92.236.0", "255.255.252.0"
+    private String findSubnetNumber(String tempIP, String tempSUB) {
+
+        String[] a = tempIP.split("\\.", 4);
+        String[] b = tempSUB.split("\\.",4);
+        String[] testIP = {"0", "0", "0", "0"};
+
+        for (int i = 0; i < 4; i++) {
+
+            if(b[i].equals("255")) {
+                testIP[i] = a[i];
+            }
+            else if (b[i].equals("0")) {
+                testIP[i] = b[i];
+            }
+            else {
+                int aNumb = Integer.parseInt(a[i]);
+                int bNumb = Integer.parseInt(b[i]);
+
+                double difference = 256 - (double) bNumb;
+                // C = 16
+                double scalar = (double) aNumb / difference;
+                // D = 73 / 16 = 4,56
+                int scaleInt = (int) scalar;
+                // E = 4
+                int intC = (int) difference;
+                // intC = 16
+                int lastNum = scaleInt*intC;
+                String tempNum = String.valueOf(lastNum);
+                testIP[i] = tempNum;
+            }
+        }
+        return String.join(".", testIP);
+    }
 
 
     private String sendGET(String path) {
@@ -198,8 +302,10 @@ public class MyAnswer {
         }
         return returnObj;
     }
+
     /**
      * Read the whole content from an InputStream, return it as a string
+     *
      * @param is Inputstream to read the body from
      * @return The whole body as a string
      */
@@ -218,4 +324,3 @@ public class MyAnswer {
         return response.toString();
     }
 }
-
