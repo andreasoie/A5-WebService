@@ -1,72 +1,88 @@
+import org.json.JSONObject;
+
 import java.io.*;
 import java.net.HttpURLConnection;
 import java.net.ProtocolException;
 import java.net.URL;
 
-/**
- * An example showing how to send HTTP GET and read the response from the server
- */
-public class GETExample {
+public class POSTExample {
 
     public static void main(String[] args) {
-        GETExample example = new GETExample("52.164.220.230", 80);
-        example.doExampleGet();
+        POSTExample postExample = new POSTExample("52.164.220.230", 80);
+        postExample.post3RandomNumbers();
     }
 
     private String BASE_URL; // Base URL (address) of the server
 
     /**
-     * Create an HTTP GET example
+     * Create an HTTP POST example
      *
      * @param host Will send request to this host: IP address or domain
      * @param port Will use this port
      */
-    public GETExample(String host, int port) {
+    public POSTExample(String host, int port) {
         BASE_URL = "http://" + host + ":" + port + "/";
     }
 
     /**
-     * Send an HTTP GET to a specific path on the web server
+     * Post three random numbers to a specific path on the web server
      */
-    public void doExampleGet() {
-        sendGet("dkrest/test/get2");
+    public void post3RandomNumbers() {
+        int a = (int) Math.round(Math.random() * 100);
+        int b = (int) Math.round(Math.random() * 100);
+        //int c = (int) Math.round(Math.random() * 100);
+
+        JSONObject json = new JSONObject();
+        json.put("a", 1);
+        json.put("b", 3);
+        //json.put("b", 5);
+        System.out.println("Posting this JSON data to server");
+        System.out.println(json.toString());
+        // TODO: change path to something correct
+        sendPost("dkrest/test/post", json);
     }
 
     /**
-     * Send HTTP GET
+     * Send HTTP POST
      *
      * @param path     Relative path in the API.
+     * @param jsonData The data in JSON format that will be posted to the server
      */
-    public String sendGet(String path) {
-        String returnObj = null;
+    public void sendPost(String path, JSONObject jsonData) {
         try {
             String url = BASE_URL + path;
             URL urlObj = new URL(url);
-            System.out.println("Sending HTTP GET to " + url);
+            System.out.println("Sending HTTP POST to " + url);
             HttpURLConnection con = (HttpURLConnection) urlObj.openConnection();
 
-            con.setRequestMethod("GET");
+            con.setRequestMethod("POST");
+            con.setRequestProperty("Content-Type", "application/json");
+            con.setDoOutput(true);
+
+            OutputStream os = con.getOutputStream();
+            os.write(jsonData.toString().getBytes());
+            os.flush();
 
             int responseCode = con.getResponseCode();
             if (responseCode == 200) {
                 System.out.println("Server reached");
+
                 // Response was OK, read the body (data)
                 InputStream stream = con.getInputStream();
-                returnObj = convertStreamToString(stream);
+                String responseBody = convertStreamToString(stream);
                 stream.close();
                 System.out.println("Response from the server:");
-                System.out.println(returnObj);
+                System.out.println(responseBody);
             } else {
                 String responseDescription = con.getResponseMessage();
                 System.out.println("Request failed, response code: " + responseCode + " (" + responseDescription + ")");
             }
         } catch (ProtocolException e) {
-            System.out.println("Protocol not supported by the server");
+            System.out.println("Protocol nto supported by the server");
         } catch (IOException e) {
             System.out.println("Something went wrong: " + e.getMessage());
             e.printStackTrace();
         }
-        return returnObj;
     }
 
     /**
@@ -74,7 +90,7 @@ public class GETExample {
      * @param is Inputstream to read the body from
      * @return The whole body as a string
      */
-    private String convertStreamToString(InputStream is) {
+    public String convertStreamToString(InputStream is) {
         BufferedReader in = new BufferedReader(new InputStreamReader(is));
         StringBuilder response = new StringBuilder();
         try {
