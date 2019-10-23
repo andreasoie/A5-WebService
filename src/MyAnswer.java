@@ -47,9 +47,7 @@ public class MyAnswer {
         String secretTask = assignment.requestTask(tempSessionID, assignment.getSecretTask());
         assignment.sendAnswer(tempSessionID, secretTask);
 
-        //assignment.requestSecretTask(tempSessionID);
-        // GET RESULTS
-        //assignment.sendGET("dkrest/results/" + tempSessionID);
+        assignment.sendGET("dkrest/results/" + tempSessionID);
 
     }
 
@@ -208,7 +206,7 @@ public class MyAnswer {
                 testIP[i] = a[i];
             }
             else if (b[i].equals("0")) {
-                testIP[i] = b[i];
+                testIP[i] = "255";
             }
             else {
                 int aNumb = Integer.parseInt(a[i]);

@@ -1,5 +1,3 @@
-import sun.awt.windows.WPrinterJob;
-
 public class Testing {
     public static void main(String[] args) {
         Testing t = new Testing();
@@ -13,16 +11,16 @@ public class Testing {
         //11000110.1011100.11101100
         //11000110.01011100.11101100.00000000
 
-        for (int i = 0; i < a; i++) {
-            if (b[i].equals("255")) {
-                cBin[i] = a[i];
-            } else {
-                cBin[i] = b[i];
-            }
+        //for (int i = 0; i < a; i++) {
+        //    if (b[i].equals("255")) {
+        //        cBin[i] = a[i];
+        //    } else {
+        //        cBin[i] = b[i];
+        //    }
 
-            System.out.println(bBin);
+            // System.out.println(bBin);
 
-        }
+
     }
 
     private String getBinary(String address) {
